@@ -57,27 +57,25 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut jtd: u8 = 0;
     let mut sdef: u8 = 0;
     let mut enter_value: u8 = 0;
-    println!("Press Key For Format");
+
     // _conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(
         in_port,
         "midir-read-input",
         move |stamp, message, _| {
+            if message[0] == 128 {
+                return;
+            }
             if format == false {
-                println!(
-                    "{}: {:?} (len inside = {})",
-                    stamp,
-                    message,
-                    message.len()
-                );
+                println!("{}: {:?} (len inside = {})", stamp, message, message.len());
                 fmt = message[1];
                 println!("Key For Format {}", fmt);
                 format = true;
-            }
-            
-            if build == false {
                 println!("Press Key For Build");
-                
+                return;
+            }
+
+            if build == false {
                 println!(
                     "{}: {:?} (len inside iff = {})",
                     stamp,
@@ -87,43 +85,32 @@ fn run() -> Result<(), Box<dyn Error>> {
                 bld = message[1];
                 println!("Key For Build {}", bld);
                 build = true;
-            }
-            
-            if jumptodef == false {
                 println!("Press Key For Opening Definition");
-                println!(
-                    "{}: {:?} (len inside = {})",
-                    stamp,
-                    message,
-                    message.len()
-                );
+                return;
+            }
+
+            if jumptodef == false {
+                println!("{}: {:?} (len inside = {})", stamp, message, message.len());
                 jtd = message[1];
                 println!("Key For Opening Definition {}", jtd);
                 jumptodef = true;
+                println!("Press Key For Inline Def");
+                return;
             }
             if showdef == false {
-                println!("Press Key For Inline Def");
-                println!(
-                    "{}: {:?} (len inside= {})",
-                    stamp,
-                    message,
-                    message.len()
-                );
+                println!("{}: {:?} (len inside= {})", stamp, message, message.len());
                 sdef = message[1];
                 println!("Key For Inline Def {}", sdef);
                 showdef = true;
+                println!("Press Key For Enter");
+                return;
             }
             if enter == false {
-                println!("Press Key For Enter");
-                println!(
-                    "{}: {:?} (len = {})",
-                    stamp,
-                    message,
-                    message.len()
-                );
+                println!("{}: {:?} (len = {})", stamp, message, message.len());
                 enter_value = message[1];
                 println!("Key For Enter {}", enter_value);
                 enter = true;
+                return;
             }
             // println!("{}: {:?} (len = {})", stamp, message, message.len());
             if message[1] == fmt {
@@ -135,7 +122,6 @@ fn run() -> Result<(), Box<dyn Error>> {
             }
             if message[1] == jtd {
                 enigo.key_click(Key::F12);
-
             }
             if message[1] == sdef {
                 enigo.key_sequence_parse("{+CTRL}{+SHIFT}");
@@ -153,6 +139,7 @@ fn run() -> Result<(), Box<dyn Error>> {
         "Connection open, reading input from '{}' (press enter to exit) ...",
         in_port_name
     );
+    println!("Press Key For Format");
 
     loop {
         input.clear();
