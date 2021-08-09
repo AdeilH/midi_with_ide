@@ -1,5 +1,5 @@
 [package]
-name = "midicheck"
+name = "midi_with_ide"
 version = "0.1.0"
 authors = ["adeilh <madeel234@yahoo.com>"]
 edition = "2018"
